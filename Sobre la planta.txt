@@ -1,0 +1,24 @@
+									
+
+										Sensor US
+
+Probablemente todo el ruido venga de las vibraciones de la barra. 
+
+Opciones:
+1) Filtro digital. SMA, EMA, Median filter(?)
+
+Link de referencia: https://www.jameco.com/Jameco/Blog/working-with-ultra-sonic-distance-sensors.html?srsltid=AfmBOorqpVns4ug5FipgjVpo7_n_V1DvQGyihgnB8pSx9QIqRfjrqGp0
+
+
+Acá el chat me tiró un paper que podría ser interesante:
+
+https://www.mdpi.com/1424-8220/21/12/4250?utm_source=chatgpt.com
+
+Ventajas: fácil de probar, solo hay que hacer el código y rezar
+
+2) Cambiar el sensor y rezar que fuera eso. 
+
+3) Dejarse de hinchas las pelotas y usar la planta de pablo
+
+4) Medir la desviación con el carrito fijo en distintas posiciones Y la planta en movimiento. Ver si el ruido realmente baja
+después de filtrado
