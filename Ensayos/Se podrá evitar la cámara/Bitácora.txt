@@ -1,0 +1,6 @@
+En el archivo proporcional.ino reciclé el control proporcional que habíamos hecho en taller de control. Le cambié:
+-> El período de muestreo
+-> Le puse un pasabajos a la posición
+-> Usé la bolita naranja en un lugar del carro
+
+Completamente inviable. 
