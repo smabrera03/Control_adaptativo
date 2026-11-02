@@ -39,7 +39,7 @@ m  = 0.033;
 b  = 0.15;    
 g  = 9.8;
 Ts = 0.02;
-fs = 50;
+fs = 1/Ts;
 
 
 s = tf('s');
@@ -88,7 +88,7 @@ La estimación por correlograma da mal.
 
 Posibles razones: 
 
-1) La excitación tiene poco contenido espectral. Estos
+1) La excitación tiene poco contenido espectral. Estoy
 dividiendo por cero casi siempre.
 
 2) Derivada ruidosa. Intenté filtrarla. Da igual de mal
