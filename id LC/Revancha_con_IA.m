@@ -1,6 +1,13 @@
 clear; clc; close all;
 
-load('datos_LC_v1_procesados.mat');
+%load('datos_LC_v1_procesados.mat');
+load('datos_cart_beam.mat'); %Obtenidos de la wemos
+
+t = datos.t;
+y = datos.q2;
+y_der = datos.q2_p;
+u = datos.u;
+
 load('resultado_servo-barra.mat');
 
 Ts = 0.02;
@@ -48,13 +55,13 @@ nfft = max(2048, 2^nextpow2(L));
 %% 3. Estimacion de densidades espectrales
 
 % Densidad espectral de potencia de la entrada
-[Suu, f] = pwelch(r, window, noverlap, nfft, Fs);
+[Suu, f] = pwelch(u, window, noverlap, nfft, Fs);
 
 % Densidad espectral de potencia de la salida
-[Syy, ~] = pwelch(y, window, noverlap, nfft, Fs);
+[Syy, ~] = pwelch(y_der, window, noverlap, nfft, Fs);
 
 % Densidad espectral cruzada entrada-salida
-[Syu, ~] = cpsd(r, y, window, noverlap, nfft, Fs);
+[Syu, ~] = cpsd(u, y_der, window, noverlap, nfft, Fs);
 
 %% 4. Respuesta en frecuencia estimada
 

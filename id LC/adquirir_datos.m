@@ -22,13 +22,13 @@ prbs = prbs(:);
 %prbs = ones(N,1);
 
 %% Abrir puerto serie
-s = serial('/dev/ttyUSB0', ...
+s = serial('COM11', ...
     'BaudRate', 115200, ...
     'Terminator', 'LF', ...
     'Timeout', 2);
 
 fopen(s);
-pause(2);
+pause(5);
 flushinput(s);
 
 fprintf(s, '0\n');
@@ -57,7 +57,7 @@ fprintf("Adquisicion iniciada.\n");
 
 % Columnas:
 % timestamp_us, q1, q2, u_wemos, referencia, tau_cmd
-T = zeros(0,6);
+T = zeros(0,7);
 
 t0 = tic;
 t_ref_next = 0;
@@ -84,10 +84,10 @@ while toc(t0) < Texp
         continue;
     end
 
-    timestamp_us = vn(1);
-    q1 = vn(2);
-    q2 = vn(3);
-    u_wemos = vn(4);
+    timestamp_us = vn(1); %Tiempo según el wemos [us]
+    q1 = vn(2); %ángulo de la barra [rad]
+    q2 = vn(3); %posición del carro [m]
+    u_wemos = vn(4); %acción de control aplicada por el wemos
 
     % Intervalo real entre muestras segun micros() del Wemos
     dt = mod(timestamp_us - ts_prev, 2^32)*1e-6;
@@ -119,13 +119,13 @@ while toc(t0) < Texp
 
     % Control de posicion del carro
     % Realimentacion de estados
-    q1_ref = Kp*(-r+q2); % - Kd*q2_p_f;
+    q1_ref = Kp*(-r+q2); % - Kd*q2_p_f; 
 
     % Enviar q1_ref al Wemos
     fprintf(s, '%.6f\n', q1_ref);
 
     % Guardar telemetria y variables del controlador
-    T(end+1,:) = [timestamp_us, q1, q2, ...
+    T(end+1,:) = [timestamp_us, q1, q2, q2_p_f ...
                   u_wemos, r, q1_ref];
 
     % Actualizar muestras anteriores
@@ -141,30 +141,46 @@ delete(s);
 clear s;
 
 %% Procesamiento de los datos
-
+%{
+Columnas de T:
+  T(:,1) = timestamp_us -> Timestamp del Wemos [us] (micros(), 32 bits)
+  T(:,2) = q1           -> Angulo de la barra medido [rad]
+  T(:,3) = q2           -> Posicion del carro medida [m]
+   T(:, 4) = q2_p_f   -> Velocidad del carro luego de pasar por el filtro
+  T(:,5) = u_wemos      -> Accion de control aplicada, reportada por el Wemos [rad]
+  T(:,6) = r            -> Referencia PRBS en ese instante [rad]
+  T(:,7) = q1_ref       -> Consigna enviada por MATLAB al Wemos [rad]
+%}
 timestamp_us = T(:,1);
-q1 = T(:,2);
-q2 = T(:,3);
-u = T(:,4);
+q1 = T(:,2); %ángulo de la barra [rad]
+q2 = T(:,3); %posición del carro [m]
+q2_p = T(:, 4);
+u = T(:,5); %acción de control [rad]
 
 % Tiempo relativo usando el reloj del Wemos.
 % Contempla el desbordamiento de micros() a los ~71.6 min.
 dt_us = mod(diff(timestamp_us), 2^32);
 t = [0; cumsum(dt_us)] * 1e-6;
 
-datos = table(t, timestamp_us, q1, q2, u);
+datos = table(t, timestamp_us, q1, q2, q2_p, u);
 
 %% Graficos
 figure;
 
-subplot(2,1,1);
+subplot(3,1,1);
 plot(t, q1 , t ,q2);
 legend('Angulo barra [rad]','Posicion Carro [m]')
 grid on;
 ylabel('q');
 title('Respuesta de la barra y el carro');
 
-subplot(2,1,2);
+subplot(3, 1, 2);
+plot(t, q2_p);
+grid on;
+ylabel('q2\_p');
+title('Velocidad');
+
+subplot(3,1,3);
 stairs(t, u);
 grid on;
 ylabel('u [rad]');
