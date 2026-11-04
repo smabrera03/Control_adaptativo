@@ -7,6 +7,7 @@ t = datos.t;
 y = datos.q2;
 y_der = datos.q2_p;
 u = datos.u;
+r = datos.r;
 
 load('resultado_servo-barra.mat');
 
@@ -65,7 +66,7 @@ nfft = max(2048, 2^nextpow2(L));
 
 %% 4. Respuesta en frecuencia estimada
 
-G = Syu ./ Suu;
+G_est = Syu ./ Suu;
 
 %% 5. Coherencia
 
@@ -94,13 +95,13 @@ title('PSD de la salida');
 figure;
 
 subplot(2,1,1)
-semilogx(f(2:end), 20*log10(abs(G(2:end))));
+semilogx(f(2:end), 20*log10(abs(G_est(2:end))));
 grid on;
 ylabel('Magnitud [dB]');
 title('Respuesta en frecuencia estimada');
 
 subplot(2,1,2)
-semilogx(f(2:end), unwrap(angle(G(2:end)))*180/pi);
+semilogx(f(2:end), unwrap(angle(G_est(2:end)))*180/pi);
 grid on;
 xlabel('Frecuencia [Hz]');
 ylabel('Fase [grados]');
@@ -118,22 +119,27 @@ ylabel('\gamma^2_{uy}');
 title('Coherencia entrada-salida');
 
 
-%{
+%% VARIABLES INSTRUMENTALES
 
-Todo mal. 
+N_corte = floor(0.7 * length(y_der));
 
-Copilot me tiró una que puede ser buena.
+z_id = iddata(y_der(1:N_corte), u(1:N_corte), Ts);
+z_val = iddata(y_der(N_corte+1:end), u(N_corte+1:end), Ts);
 
-G = Syr/Sur
+modelo_IV4 = iv4(z_id, [3, 3, 1]);
+present(modelo_IV4);
 
+compare(z_val, modelo_IV4);
 
-Otra posibilidad:
+%% VARIABLES INSTRUMENTALES CON DATOS MEDIDOS
+load('datos_LC_v1_procesados.mat');
 
-u = -Kp * y  + d
+N_corte = floor(0.7 * length(y_der));
 
-donde d es PRBS
+z_id = iddata(y_der(1:N_corte), u(1:N_corte), Ts);
+z_val = iddata(y_der(N_corte+1:end), u(N_corte+1:end), Ts);
 
-andará?
+modelo_IV4 = iv4(z_id, [3, 3, 1]);
+present(modelo_IV4);
 
-Mi conclusión: está mal hecho este experimento
-%}
+compare(z_val, modelo_IV4);

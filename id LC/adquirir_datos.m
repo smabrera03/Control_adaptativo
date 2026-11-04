@@ -3,13 +3,13 @@ clear; clc; close all;
 
 %% Configuracion del ensayo
 
-Texp = 10;           % Duracion [s]
-Ts_prbs = 0.05;      % Actualizacion PRBS: 20 Hz
-A = 0.05;            % Amplitud de la entrada [rad]
+Texp = 60;           % Duracion [s]
+Ts_prbs = 1.5;      % Actualizacion PRBS: 20 Hz
+A = 0.1;            % Amplitud de la entrada [rad]
 
 % Controlador PD (valores iniciales para ajustar)
 Kp = 1.0;
-Kd = 0.2;
+Kd = 0.0;
 % Filtro de velocidad
 alpha = 0.7;
 
@@ -156,36 +156,43 @@ q1 = T(:,2); %ángulo de la barra [rad]
 q2 = T(:,3); %posición del carro [m]
 q2_p = T(:, 4);
 u = T(:,5); %acción de control [rad]
+r = T(:, 6);
 
 % Tiempo relativo usando el reloj del Wemos.
 % Contempla el desbordamiento de micros() a los ~71.6 min.
 dt_us = mod(diff(timestamp_us), 2^32);
 t = [0; cumsum(dt_us)] * 1e-6;
 
-datos = table(t, timestamp_us, q1, q2, q2_p, u);
+datos = table(t, timestamp_us, q1, q2, q2_p, u, r);
 
 %% Graficos
+
+figure;
+subplot(2, 1, 1);
+plot(t, q2, 'LineWidth', 1.5);
+grid on;
+title('Posición [m]');
+
+subplot(2, 1, 2);
+plot(t, r, 'LineWidth', 1.5);
+grid on;
+title('Referencia[m]');
+ylim( [-1.1*A, 1.1*A]);
+
+
 figure;
 
-subplot(3,1,1);
-plot(t, q1 , t ,q2);
-legend('Angulo barra [rad]','Posicion Carro [m]')
+subplot(2,1,1);
+plot(t, rad2deg(u));
 grid on;
-ylabel('q');
-title('Respuesta de la barra y el carro');
+ylabel('u [°]');
+title('Acción de control');
 
-subplot(3, 1, 2);
+subplot(2, 1, 2);
 plot(t, q2_p);
 grid on;
 ylabel('q2\_p');
 title('Velocidad');
-
-subplot(3,1,3);
-stairs(t, u);
-grid on;
-ylabel('u [rad]');
-xlabel('Tiempo [s]');
-title('Entrada aplicada');
 
 %% Guardar
 %writetable(datos, 'datos_pendulo_prbs.csv');
