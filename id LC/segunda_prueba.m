@@ -127,7 +127,7 @@ compare(modeloOE_int, z_val_int);
 Observación: cuanto más chico es el intervalo de comparación mejor es la
 estimación. El integrador acumula error.
 
-Simula bien a corto plaz?
+Simula bien a corto plazo?
 
 PENSAR
 %}
